@@ -1,10 +1,10 @@
 import java.util.Objects;
-
 class IceCream {
     public int bill;
     public String flavour;
     public String scoops;
     public String toppings;
+    public int quantity;
 
     public void setFlavour(String flavour){
         this.flavour=flavour;
@@ -46,7 +46,11 @@ class IceCream {
              this.bill+=80;
          }
      }
+     public void setQuantity(int quantity){
+        this.quantity =quantity;
+        bill*=quantity;
+     }
      public int generateBill(){
-         return this.bill;
+        return this.bill;
      }
 }
