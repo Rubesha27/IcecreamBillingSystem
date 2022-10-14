@@ -9,15 +9,17 @@ import java.awt.event.ActionListener;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Objects;
 
 class TheGUI  {
      JPanel panel;
  JButton checkout , menu, ok;
- JLabel title, flavourLabel,scoopsLabel,toppingsLabel, image ,billLabel;
+ JLabel title, flavourLabel,scoopsLabel,toppingsLabel, image ,billLabel,quantityLabel;
  JComboBox chooseflavours ,chooseScoops, chooseToppings;
+ JTextField quantityField;
 
 TheGUI(){
-    //The Thread
+    //TheThread
     TheThread loadingScreen = new TheThread();
     loadingScreen.start();
     try{
@@ -51,6 +53,10 @@ TheGUI(){
     toppingsLabel = new JLabel("Toppings");
     toppingsLabel.setFont(f1);
     toppingsLabel.setBounds(20,455,110,29);
+    quantityLabel= new JLabel("Quantity ");
+    quantityLabel.setFont(f1);
+    quantityLabel.setBounds(20,540,180,25);
+
 
     Font f3 = new Font("Times Roman",Font.BOLD,17);
     String [] flavours = {"Vanilla","Chocolate","Peppermint","Pineapple",
@@ -67,17 +73,19 @@ TheGUI(){
     chooseToppings = new JComboBox(toppings);
     chooseToppings.setFont(f3);
     chooseToppings.setBounds(180,455,220,30);
+    quantityField= new JTextField();
+    quantityField.setBounds(180,540,220,30);
 
 
     Font f2 = new Font("Arial", Font.BOLD,24);
 
     menu = new JButton("Read Menu");
     menu.setFont(f2);
-    menu.setBounds(155,550,170,70);
+    menu.setBounds(155,580,170,70);
 
     checkout = new JButton("Checkout");
     checkout.setFont(f2);
-    checkout.setBounds(410,550,150,70);
+    checkout.setBounds(410,580,150,70);
 
     menu.addActionListener(new ActionListener() {
         @Override
@@ -146,7 +154,7 @@ TheGUI(){
             threeScoop.setBounds(20,310,200,20);
             threeScoop.setFont(f4);
             menuPanel.add(threeScoop);
-            JLabel fourScoop = new JLabel("4 Scoops \t Rs 150/-");
+            JLabel fourScoop = new JLabel("4 Scoops \t Rs 250/-");
             fourScoop.setBounds(20,330,200,20);
             fourScoop.setFont(f4);
             menuPanel.add(fourScoop);
@@ -189,13 +197,14 @@ TheGUI(){
               json.put("Flavour",chooseflavours.getSelectedItem());
               json.put("Scoops",chooseScoops.getSelectedItem());
               json.put("Toppings",chooseToppings.getSelectedItem());
+              json.put("Quantity",quantityField.getText());
 
               FileWriter file = new FileWriter("Order.json");
               file.write(json.toJSONString());
               file.close();
 
               JFrame frame2 = new JFrame("Your Order");
-              frame2.setBounds(400,100,400,410);
+              frame2.setBounds(400,100,400,450);
               JPanel panel2 = new JPanel(null);
 
               Object ob = new JSONParser().parse(new FileReader("Order.json"));
@@ -204,46 +213,66 @@ TheGUI(){
               String f = (String) js.get("Flavour");
               String s = (String) js.get("Scoops");
               String t = (String) js.get("Toppings");
+              String q = (String) js.get("Quantity");
 
+              if (Objects.equals(q,"0")){
+                  JOptionPane.showMessageDialog(null, "quantity can not be zero!!",
+                          "Hey!", JOptionPane.ERROR_MESSAGE);
+
+              }
+               else {
               panel2.setBackground(Color.yellow);
 
               JLabel title2 = new JLabel("Your Order is");
               title2.setBounds(10,20,400,50);
               title2.setFont(new Font("Arial",Font.BOLD,30));
 
-              flavourLabel = new JLabel("Flavour"+"  "+f);
-              flavourLabel.setFont(f1);
-              flavourLabel.setBounds(20,100,400,50);
-              scoopsLabel = new JLabel("Scoops"+"  "+s);
-              scoopsLabel.setFont(f1);
-              scoopsLabel.setBounds(20,180,400,50);
-              toppingsLabel = new JLabel("Toppings"+"  "+t);
-              toppingsLabel.setFont(f1);
-              toppingsLabel.setBounds(20,260,400,50);
 
-              //IceCream Object
+              Font f4 = new Font("Courier",Font.PLAIN,20);
+              flavourLabel = new JLabel("Flavour ---"+"  "+f);
+              flavourLabel.setFont(f4);
+              flavourLabel.setBounds(20,100,400,50);
+              scoopsLabel = new JLabel("Scoops ---"+"  "+s);
+              scoopsLabel.setFont(f4);
+              scoopsLabel.setBounds(20,180,400,50);
+              toppingsLabel = new JLabel("Toppings ---"+"  "+t);
+              toppingsLabel.setFont(f4);
+              toppingsLabel.setBounds(20,260,400,50);
+              quantityLabel= new JLabel("Quantity ---"+"  "+q);
+              quantityLabel.setFont(f4);
+              quantityLabel.setBounds(20,300,400,50);
+
+              //IceCream Class Object
               IceCream iceCream = new IceCream();
               iceCream.setFlavour(f);
               iceCream.setScoops(s);
               iceCream.setToppings(t);
+              iceCream.setQuantity(Integer.parseInt(q));
               String bill = String.valueOf(iceCream.generateBill());
 
               billLabel = new JLabel("Bill: "+"  "+bill);
               billLabel.setFont(new Font("Times new roman",Font.ITALIC,25));
-              billLabel.setBounds(100,315,100,30);
+              billLabel.setBounds(100,350,180,30);
 
               ok = new JButton("Ok");
               ok.setFont(new Font("Arial",Font.BOLD,19));
-              ok.setBounds(280,310,80,45);
+              ok.setBounds(280,350,80,45);
               ok.addActionListener(new ActionListener() {
                   @Override
                   public void actionPerformed(ActionEvent e) {
-                      frame2.setVisible(false);
-                        JOptionPane.showMessageDialog(frame2,"Your order is placed.");
-                      frame1.setVisible(false);
-                      frame1.dispose(); frame2.dispose();
-                      frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                      frame1.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                      int response =JOptionPane.showConfirmDialog(frame2,"Order Confirmed?");
+                      if(response==0){
+                          frame2.dispose();
+                          JOptionPane.showMessageDialog(frame1,"Your order has been placed.");
+                          frame1.dispose();
+                      } else if (response==1) {
+                          frame2.dispose();
+                      } else if (response==2) {
+                          frame2.dispose();
+                          JOptionPane.showMessageDialog(frame1,"Your order has been canceled.");
+                          frame1.dispose();
+
+                      }
                   }
               });
 
@@ -253,13 +282,14 @@ TheGUI(){
               panel2.add(scoopsLabel);
               panel2.add(toppingsLabel);
               panel2.add(billLabel);
+              panel2.add(quantityLabel);
               frame2.add(panel2);
-              frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-              frame2.setVisible(true);
-              frame2.setResizable(false);
-
+                  frame2.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                  frame2.setVisible(true);
+                  frame2.setResizable(false);
+              }
           }catch (NumberFormatException formatException){
-              JOptionPane.showMessageDialog(frame1,"ERROR");
+              JOptionPane.showMessageDialog(frame1,"Please enter Quantity!!");
           }catch (IOException ioException){
               JOptionPane.showMessageDialog(frame1,"File not found.");
           } catch (ParseException ex) {
@@ -273,9 +303,11 @@ TheGUI(){
     panel.add(flavourLabel);
     panel.add(scoopsLabel);
     panel.add(toppingsLabel);
+    panel.add(quantityLabel);
     panel.add(chooseflavours);
     panel.add(chooseScoops);
     panel.add(chooseToppings);
+    panel.add(quantityField);
 
     panel.add(checkout);
     panel.add(menu);
@@ -285,6 +317,4 @@ TheGUI(){
     frame1.setResizable(false);
     frame1.setVisible(true);
 }
-
 }
-
